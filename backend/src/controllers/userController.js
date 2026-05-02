@@ -40,8 +40,15 @@ async function updateUser(req, res) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const user = await User.update(req.params.id, req.body);
+  const { password, ...fields } = req.body;
+
+  const user = await User.update(req.params.id, fields);
   if (!user) return res.status(404).json({ error: 'User not found' });
+
+  if (password && password.trim().length >= 8) {
+    await User.updatePassword(req.params.id, password);
+  }
+
   res.json(user);
 }
 

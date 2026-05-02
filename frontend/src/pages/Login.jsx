@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { login as apiLogin } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import Spinner from '../components/Spinner'
@@ -74,6 +74,21 @@ export default function Login() {
             Entrar
           </button>
         </form>
+
+        <div className="mt-4 flex justify-between text-sm">
+          <Link
+            to="/access-request?type=first_access"
+            className="text-blue-600 hover:underline"
+          >
+            Primeiro acesso
+          </Link>
+          <Link
+            to="/access-request?type=password_reset"
+            className="text-gray-500 hover:text-gray-700 hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
+        </div>
       </div>
     </div>
   )

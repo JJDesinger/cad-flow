@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { body } = require('express-validator');
-const { login, me, changePassword } = require('../controllers/authController');
+const { login, me, changePassword, windowsAutoLogin } = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 
 router.post(
@@ -11,6 +11,8 @@ router.post(
   ],
   login
 );
+
+router.post('/windows-login', windowsAutoLogin);
 
 router.get('/me', authenticate, me);
 

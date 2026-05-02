@@ -19,9 +19,12 @@ function getTransporter() {
   return transporter;
 }
 
-async function send({ to, subject, html }) {
+async function send({ to, subject, html, text }) {
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-    console.log(`[email] SMTP not configured — would send to ${to}: "${subject}"`);
+    console.log(`[email] SMTP nao configurado`);
+    console.log(`  Para:    ${to}`);
+    console.log(`  Assunto: ${subject}`);
+    if (text) console.log(`  ${text}`);
     return { skipped: true };
   }
 
@@ -171,4 +174,50 @@ function templates(activity, extra = {}) {
   };
 }
 
-module.exports = { send, templates };
+// ── Access request templates ──────────────────────────────────────────────────
+
+function requestTemplates(request) {
+  const appUrl = process.env.APP_URL || 'http://localhost:5174';
+  const typeLabel = request.type === 'first_access' ? 'Primeiro Acesso' : 'Recuperação de Senha';
+
+  return {
+    admin_notification: {
+      subject: `[CAD Flow] Nova solicitação: ${typeLabel} — ${request.email}`,
+      html: wrap(`Solicitação de ${typeLabel}`, `
+        <p>Uma nova solicitação foi recebida e aguarda sua aprovação:</p>
+        <div class="highlight">
+          ${request.name ? `<strong>Nome:</strong> ${request.name}<br>` : ''}
+          <strong>E-mail:</strong> ${request.email}<br>
+          <strong>Tipo:</strong> ${typeLabel}<br>
+          <strong>Data:</strong> ${new Date(request.created_at).toLocaleString('pt-BR')}
+        </div>
+        <p><a href="${appUrl}/users?tab=requests">Gerenciar solicitações no sistema →</a></p>
+      `),
+    },
+
+    user_approved: (type) => ({
+      subject: `[CAD Flow] Seu acesso foi liberado`,
+      text: `Email: ${request.email} | Use a senha que voce cadastrou na solicitacao.`,
+      html: wrap('Acesso liberado', `
+        <p>Olá${request.name ? ` <strong>${request.name}</strong>` : ''},</p>
+        <p>${type === 'first_access' ? 'Seu cadastro foi aprovado!' : 'Sua senha foi redefinida!'} Acesse o sistema com o e-mail e a senha que você informou na solicitação.</p>
+        <div class="highlight">
+          <strong>E-mail:</strong> ${request.email}
+        </div>
+        <p><a href="${appUrl}/login">Acessar o sistema →</a></p>
+      `),
+    }),
+
+    user_rejected: (notes) => ({
+      subject: `[CAD Flow] Solicitação não aprovada`,
+      html: wrap('Solicitação não aprovada', `
+        <p>Olá${request.name ? ` <strong>${request.name}</strong>` : ''},</p>
+        <p>Sua solicitação de <strong>${typeLabel.toLowerCase()}</strong> não foi aprovada.</p>
+        ${notes ? `<div class="highlight"><strong>Motivo:</strong> ${notes}</div>` : ''}
+        <p>Em caso de dúvidas, entre em contato com o administrador do sistema.</p>
+      `),
+    }),
+  };
+}
+
+module.exports = { send, templates, requestTemplates };

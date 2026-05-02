@@ -2,11 +2,12 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }
 const express = require('express');
 const cors = require('cors');
 
-const authRoutes          = require('./routes/authRoutes');
-const userRoutes          = require('./routes/userRoutes');
-const activityRoutes      = require('./routes/activityRoutes');
-const dashboardRoutes     = require('./routes/dashboardRoutes');
-const notificationRoutes  = require('./routes/notificationRoutes');
+const authRoutes            = require('./routes/authRoutes');
+const userRoutes            = require('./routes/userRoutes');
+const activityRoutes        = require('./routes/activityRoutes');
+const dashboardRoutes       = require('./routes/dashboardRoutes');
+const notificationRoutes    = require('./routes/notificationRoutes');
+const accessRequestRoutes   = require('./routes/accessRequestRoutes');
 
 const app = express();
 
@@ -17,7 +18,8 @@ app.use('/api/auth',          authRoutes);
 app.use('/api/users',         userRoutes);
 app.use('/api/activities',    activityRoutes);
 app.use('/api/dashboard',     dashboardRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/notifications',    notificationRoutes);
+app.use('/api/access-requests',  accessRequestRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

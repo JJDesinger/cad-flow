@@ -36,6 +36,24 @@ async function me(req, res) {
   res.json(user);
 }
 
+async function windowsAutoLogin(req, res) {
+  const { windows_username } = req.body;
+  if (!windows_username) {
+    return res.status(400).json({ error: 'windows_username é obrigatório.' });
+  }
+
+  const user = await User.findByWindowsUsername(windows_username);
+  if (!user) {
+    return res.status(401).json({ error: 'Usuário não encontrado ou sem vínculo Windows configurado.' });
+  }
+
+  const token = signToken(user);
+  res.json({
+    token,
+    user: { id: user.id, name: user.name, email: user.email, roles: user.role },
+  });
+}
+
 async function changePassword(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -53,4 +71,4 @@ async function changePassword(req, res) {
   res.json({ message: 'Password updated successfully' });
 }
 
-module.exports = { login, me, changePassword };
+module.exports = { login, me, changePassword, windowsAutoLogin };
